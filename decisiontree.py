@@ -139,11 +139,14 @@ test_set['labels'] = test_set['labels'] + [8 for i in range(len(eight_sets['test
 test_set['labels'] = test_set['labels'] + [9 for i in range(len(nine_sets['test_set']))]
 
 classifier = DecisionTreeClassifier(criterion='entropy').fit(training_set['images'], training_set['labels'])
+validation_set_classifications = classifier.predict(validation_set['images'])
 
+#
+# Right/Wrong Classifications for the Validation Set
+#
 number_of_right_classifications = 0
 number_of_wrong_classifications = 0
 
-validation_set_classifications = classifier.predict(validation_set['images'])
 for i in range(len(validation_set_classifications)):
     if validation_set_classifications[i] == validation_set['labels'][i]:
         number_of_right_classifications += 1
@@ -152,3 +155,24 @@ for i in range(len(validation_set_classifications)):
 
 print('number of right classifications: {}'.format(number_of_right_classifications))
 print('number of wrong classifications: {}'.format(number_of_wrong_classifications))
+
+#
+# Confusion Matrix for the Validation Set
+#
+confusion_matrix = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+
+for i in range(len(validation_set_classifications)):
+    true_label = validation_set['labels'][i]
+    predicted_label = validation_set_classifications[i]
+    confusion_matrix[true_label][predicted_label] += 1
+
+print(np.matrix(confusion_matrix))
