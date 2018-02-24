@@ -138,41 +138,44 @@ test_set['labels'] = test_set['labels'] + [7 for i in range(len(seven_sets['test
 test_set['labels'] = test_set['labels'] + [8 for i in range(len(eight_sets['test_set']))]
 test_set['labels'] = test_set['labels'] + [9 for i in range(len(nine_sets['test_set']))]
 
-classifier = KNeighborsClassifier(n_neighbors=5).fit(training_set['images'], training_set['labels'])
-validation_set_classifications = classifier.predict(validation_set['images'])
-
-#
-# Right/Wrong Classifications for the Validation Set
-#
-number_of_right_classifications = 0
-number_of_wrong_classifications = 0
-
-for i in range(len(validation_set_classifications)):
-    if validation_set_classifications[i] == validation_set['labels'][i]:
-        number_of_right_classifications += 1
-    else:
-        number_of_wrong_classifications += 1
-
-print('number of right classifications: {}'.format(number_of_right_classifications))
-print('number of wrong classifications: {}'.format(number_of_wrong_classifications))
-
-#
-# Confusion Matrix for the Validation Set
-#
-confusion_matrix = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-
-for i in range(len(validation_set_classifications)):
-    true_label = validation_set['labels'][i]
-    predicted_label = validation_set_classifications[i]
-    confusion_matrix[true_label][predicted_label] += 1
-
-print(np.matrix(confusion_matrix))
+for i in range(4,5):
+    print('k-nearest neighbors, weighted, for k = {}'.format(i))
+    classifier = KNeighborsClassifier(n_neighbors=i, weights='distance').fit(training_set['images'], training_set['labels'])
+    test_set_classifications = classifier.predict(test_set['images'])
+    
+    #
+    # Right/Wrong Classifications for the Validation Set
+    #
+    number_of_right_classifications = 0
+    number_of_wrong_classifications = 0
+    
+    for i in range(len(test_set_classifications)):
+        if test_set_classifications[i] == test_set['labels'][i]:
+            number_of_right_classifications += 1
+        else:
+            number_of_wrong_classifications += 1
+    
+    print('number of right classifications: {}'.format(number_of_right_classifications))
+    print('number of wrong classifications: {}'.format(number_of_wrong_classifications))
+    
+    #
+    # Confusion Matrix for the Validation Set
+    #
+    confusion_matrix = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+    
+    for i in range(len(test_set_classifications)):
+        true_label = test_set['labels'][i]
+        predicted_label = test_set_classifications[i]
+        confusion_matrix[true_label][predicted_label] += 1
+    
+    print(np.matrix(confusion_matrix))
+    print()
