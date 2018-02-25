@@ -1,7 +1,10 @@
 import keras.utils
 from keras.models import Sequential
-from keras.layers import Dense, Activation
+from keras.layers import Dense, Dropout, Activation
 from keras import utils as np_utils
+from sklearn.metrics import confusion_matrix
+from matplotlib import pyplot as plt
+from numpy import argmax
 import numpy as np
 
 img = np.load('images.npy')
@@ -75,14 +78,10 @@ print(len(lbltest))
 # Model Template
 
 model = Sequential() # declare model
-model.add(Dense(10, input_shape=(28*28, ), kernel_initializer='he_normal')) # first layer
+model.add(Dense(512, input_shape=(28*28, ), kernel_initializer='he_normal')) # first layer
 model.add(Activation('relu'))
-#
-#
-#
-# Fill in Model Here
-#
-#
+model.add(Dense(512, activation='sigmoid', input_shape=(784,)))
+model.add(Dense(512, activation='tanh'))
 model.add(Dense(10, kernel_initializer='he_normal')) # last layer
 model.add(Activation('softmax'))
 
@@ -93,12 +92,38 @@ model.compile(optimizer='sgd',
               metrics=['accuracy'])
 
 # Train Model
-history = model.fit(train, lbltrain,
-                    epochs=10, 
-                    batch_size=512)
+history = model.fit(train, lbltrain, validation_data=(validate, lblvalidate),
+                    epochs=40, 
+                    batch_size=256)
 
 
 # # Report Results
 
 print(history.history)
-#model.predict()
+prediction = model.predict(test)
+
+actual = np.array(np.argmax(lbltest, axis=1))
+predicted = np.array(np.argmax(prediction, axis=1))
+
+print(actual)
+print(predicted)
+
+cm = confusion_matrix(actual, predicted)
+print(cm)
+
+score = model.evaluate(test, lbltest, verbose=0)
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])
+
+cnt = 0
+for i in range(0, len(actual)):
+    if cnt > 3:
+        break
+    if actual[i] != predicted[i] and actual[i]==cnt:
+        print("actual: ", actual[i])
+        print("Predicted: ", predicted[i])
+        im = test[i].reshape(28, 28)
+        plt.imshow(im, cmap='gray', interpolation='nearest')
+        plt.figure(1 + cnt)
+        cnt+= 1
+plt.show()
