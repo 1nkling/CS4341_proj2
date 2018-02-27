@@ -138,8 +138,10 @@ test_set['labels'] = test_set['labels'] + [7 for i in range(len(seven_sets['test
 test_set['labels'] = test_set['labels'] + [8 for i in range(len(eight_sets['test_set']))]
 test_set['labels'] = test_set['labels'] + [9 for i in range(len(nine_sets['test_set']))]
 
-classifier = DecisionTreeClassifier(criterion='entropy').fit(training_set['images'], training_set['labels'])
-validation_set_classifications = classifier.predict(validation_set['images'])
+
+baselineTree = DecisionTreeClassifier(max_depth=10).fit(training_set['images'], training_set['labels'])
+# baselineTree = DecisionTreeClassifier(random_state=100, max_depth=3).fit(training_set['images'], training_set['labels']) #restricting max depth
+validation_set_classifications = baselineTree.predict(validation_set['images'])
 
 #
 # Right/Wrong Classifications for the Validation Set
@@ -176,3 +178,48 @@ for i in range(len(validation_set_classifications)):
     confusion_matrix[true_label][predicted_label] += 1
 
 print(np.matrix(confusion_matrix))
+print('Model accuracy: {}'.format((number_of_right_classifications)/(number_of_right_classifications+number_of_wrong_classifications)))
+print()
+
+
+
+# Decision tree with modifications
+modifiedTree = DecisionTreeClassifier(criterion='entropy', splitter='best', max_depth=None, min_samples_split=4).fit(training_set['images'], training_set['labels'])
+validation_set_classifications2 = modifiedTree.predict(validation_set['images'])
+
+#
+# Right/Wrong Classifications for the Validation Set
+#
+number_of_right_classifications = 0
+number_of_wrong_classifications = 0
+
+for i in range(len(validation_set_classifications2)):
+    if validation_set_classifications2[i] == validation_set['labels'][i]:
+        number_of_right_classifications += 1
+    else:
+        number_of_wrong_classifications += 1
+
+print('number of right classifications: {}'.format(number_of_right_classifications))
+print('number of wrong classifications: {}'.format(number_of_wrong_classifications))
+
+#
+# Confusion Matrix for the Validation Set
+#
+confusion_matrix = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+
+for i in range(len(validation_set_classifications2)):
+    true_label = validation_set['labels'][i]
+    predicted_label = validation_set_classifications2[i]
+    confusion_matrix[true_label][predicted_label] += 1
+
+print(np.matrix(confusion_matrix))
+print('Model accuracy: {}'.format((number_of_right_classifications)/(number_of_right_classifications+number_of_wrong_classifications)))
