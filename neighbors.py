@@ -1,14 +1,25 @@
+################################
+# Code for k-nearest neighbors #
+################################
+
 import numpy as np
 from math import floor
 from sklearn.neighbors import KNeighborsClassifier
 from skimage import io
 
+#
+# Preprocessing (lines 14-160)
+#
+
+# Load MNIST dataset files
 images_as_matrices = np.load('images.npy')
 labels_as_integers = np.load('labels.npy')
 
+# Reshape dataset for sklearn input
 images_as_vertices = np.reshape(images_as_matrices, (6500, 784))
 #labels_as_vertices = utils.to_categorical(labels_as_integers, num_classes=10)
 
+# Sort images into classes
 zeroes = []
 ones = []
 twos = []
@@ -42,6 +53,13 @@ for i in range(len(labels_as_integers)):
     else: #if labels_as_integers[i] == 9:
         nines.append(images_as_vertices[i])
 
+#
+# Returns a tuple that splits a list into three sublists
+# The sublists are labeled 'training_set', 'validation_set', and 'test_set'
+# 'training_set' contains the 0-60% portion of the original list
+# 'validation_set' contains the 60-75% portion of the original list
+# 'test_set' contains the 75-100% portion of the original list
+#
 def split(clas):
     training_set = []
     validation_set = []
@@ -61,6 +79,7 @@ def split(clas):
 
     return {'training_set': training_set, 'validation_set': validation_set, 'test_set': test_set}
 
+# Split class sets into training sets, validation sets, and test sets
 zero_sets = split(zeroes)
 one_sets = split(ones)
 two_sets = split(twos)
@@ -72,6 +91,7 @@ seven_sets = split(sevens)
 eight_sets = split(eights)
 nine_sets = split(nines)
 
+# Combine training sets, validation sets, and test sets
 training_set = {'images': [], 'labels': []}
 validation_set = {'images': [], 'labels': []}
 test_set = {'images': [], 'labels': []}
@@ -139,13 +159,16 @@ test_set['labels'] = test_set['labels'] + [7 for i in range(len(seven_sets['test
 test_set['labels'] = test_set['labels'] + [8 for i in range(len(eight_sets['test_set']))]
 test_set['labels'] = test_set['labels'] + [9 for i in range(len(nine_sets['test_set']))]
 
-for i in range(4,5):
+# Perform k-nearest neighbors experiments; change k on each iteration
+# (to perform experiments on weighted vs unweighted k-nearest neighbors, we just changed the approrpiate parameter on subsequent script executions)
+# (likewise on performing predictions on the validation set or test set)
+for i in range(1,14):
     print('k-nearest neighbors, weighted, for k = {}'.format(i))
     classifier = KNeighborsClassifier(n_neighbors=i, weights='distance').fit(training_set['images'], training_set['labels'])
     test_set_classifications = classifier.predict(test_set['images'])
     
     #
-    # Right/Wrong Classifications for the Validation Set
+    # Right/Wrong Classifications
     #
     number_of_right_classifications = 0
     number_of_wrong_classifications = 0
@@ -161,7 +184,7 @@ for i in range(4,5):
     print('accuracy: {}'.format(number_of_right_classifications/len(test_set_classifications)))
     
     #
-    # Confusion Matrix for the Validation Set
+    # Confusion Matrix
     #
     confusion_matrix = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -186,6 +209,7 @@ for i in range(4,5):
     print(np.matrix(confusion_matrix))
     print()
 
+    # Calculate precision and recall (commented out)
     for i in range(10):
         true_positives = confusion_matrix[i][i]
         false_positives = 0
@@ -202,9 +226,9 @@ for i in range(4,5):
         #print('number of false positives for {} is {}'.format(i, false_positives))
         #print('number of false negatives for {} is {}'.format(i, false_negatives))
         #print('number of true negatives for {} is {}'.format(i, true_negatives))
-        print('Precision for {} is {}'.format(i, true_positives/(true_positives + false_positives)))
-        print('Recall for {} is {}'.format(i, true_positives/(true_positives + false_negatives)))
-        print()
+        #print('Precision for {} is {}'.format(i, true_positives/(true_positives + false_positives)))
+        #print('Recall for {} is {}'.format(i, true_positives/(true_positives + false_negatives)))
+        #print()
 
     #neighbors = classifier.kneighbors([test_set['images'][775]], 4)
 
